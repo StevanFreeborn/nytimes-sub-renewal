@@ -1,0 +1,25 @@
+name: Run
+on:
+  workflow_dispatch:
+env:
+  LIB_USERNAME: ${{ secrets.LIB_USERNAME }}
+  LIB_PASSWORD: ${{ secrets.LIB_PASSWORD }}
+  NY_USERNAME: ${{ secrets.NY_USERNAME }}
+  NY_PASSWORD: ${{ secrets.NY_PASSWORD }}
+jobs:
+  renew_subscription:
+    name: Renew Subscription
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.45.3-jammy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm install
+      - name: Run script
+        run: npm run start
