@@ -15,7 +15,7 @@ main()
 async function main() {
   chromium.use(stealth()); // use stealth plugin
 
-  const browser = await chromium.launch({ headless: env.CI, slowMo: 3000 });
+  const browser = await chromium.launch({ headless: env.CI, slowMo: 3000, channel: 'msedge' });
   const context = await browser.newContext();
   const initialPage = await context.newPage();
 
@@ -28,17 +28,17 @@ async function main() {
   const loginPage = await libLoginPagePromise;
 
   console.log('Logging in to library');
-  await loginPage.getByLabel('Username or Barcode:').fill(env.LIB_USERNAME);
-  await loginPage.getByLabel('PIN/Password :').fill(env.LIB_PASSWORD);
+  await loginPage.getByLabel('Username or Barcode:').pressSequentially(env.LIB_USERNAME, { delay: 150 });
+  await loginPage.getByLabel('PIN/Password :').pressSequentially(env.LIB_PASSWORD, { delay: 150 });
   await loginPage.getByRole('button', { name: /log in/i }).click();
   await loginPage.waitForURL(/nytimes/i);
 
   console.log('Logging in to NYT');
   await loginPage.getByTestId('login-lnk').click();
   await loginPage.waitForURL(/myaccount\.nytimes/i);
-  await loginPage.getByLabel('Email Address').fill(env.NY_USERNAME);
+  await loginPage.getByLabel('Email Address').pressSequentially(env.NY_USERNAME, { delay: 150 });
   await loginPage.getByTestId('submit-email').click();
-  await loginPage.getByLabel('Password', { exact: true }).fill(env.NY_PASSWORD);
+  await loginPage.getByLabel('Password', { exact: true }).pressSequentially(env.NY_PASSWORD, { delay: 150 });
   await loginPage.getByTestId('login-button').click();
   await loginPage.waitForLoadState('networkidle');
 
