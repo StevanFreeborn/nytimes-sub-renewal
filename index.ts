@@ -1,5 +1,6 @@
 import { env } from './env';
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-extra'; // extends playwright with plugin ability
+import stealth from 'puppeteer-extra-plugin-stealth'; // stealth plugin to avoid bot detection
 
 main()
   .then(() => {
@@ -12,7 +13,9 @@ main()
   });
 
 async function main() {
-  const browser = await chromium.launch({ headless: env.CI });
+  chromium.use(stealth()); // use stealth plugin
+
+  const browser = await chromium.launch({ headless: env.CI, slowMo: 3000 });
   const context = await browser.newContext();
   const initialPage = await context.newPage();
 
@@ -39,7 +42,7 @@ async function main() {
   await loginPage.getByTestId('login-button').click();
   await loginPage.waitForLoadState('networkidle');
 
-  const confirmationText = loginPage.getByText(/your pass is active/i);
+  const confirmationText = loginPage.getByText(/set a calendar reminder to renew/i);
   const confirmationTextVisible = await confirmationText.isVisible();
 
   if (confirmationTextVisible) {
