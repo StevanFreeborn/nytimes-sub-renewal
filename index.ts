@@ -12,7 +12,7 @@ main()
   });
 
 async function main() {
-  const browser = await chromium.launch({ headless: false});
+  const browser = await chromium.launch({ headless: env.CI });
   const context = await browser.newContext();
   const initialPage = await context.newPage();
 

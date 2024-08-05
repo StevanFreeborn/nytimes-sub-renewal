@@ -6,6 +6,7 @@ env:
   LIB_PASSWORD: ${{ secrets.LIB_PASSWORD }}
   NY_USERNAME: ${{ secrets.NY_USERNAME }}
   NY_PASSWORD: ${{ secrets.NY_PASSWORD }}
+  CI: true
 jobs:
   renew_subscription:
     name: Renew Subscription
