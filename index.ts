@@ -19,35 +19,52 @@ async function main() {
   const context = await browser.newContext();
   const initialPage = await context.newPage();
 
-  console.log('Navigating to library website');
-  await initialPage.goto('https://www.olathelibrary.org/online-resources/online-entertainment#enewspapers', { timeout: 300_000 });
+  const maxRetries = 3;
+  let retries = 0;
 
-  console.log('Clicking on New York Times');
-  const libLoginPagePromise = context.waitForEvent('page');
-  await initialPage.getByRole('link', { name: /new york times/i }).click();
-  const loginPage = await libLoginPagePromise;
+  while (retries < maxRetries) {
+    try {
+      console.log('Navigating to library website');
+      await initialPage.goto('https://www.olathelibrary.org/online-resources/online-entertainment#enewspapers', { timeout: 300_000 });
+    
+      console.log('Clicking on New York Times');
+      const libLoginPagePromise = context.waitForEvent('page');
+      await initialPage.getByRole('link', { name: /new york times/i }).click();
+      const loginPage = await libLoginPagePromise;
+    
+      console.log('Logging in to library');
+      await loginPage.getByLabel('Username or Barcode:').pressSequentially(env.LIB_USERNAME, { delay: 150 });
+      await loginPage.getByLabel('PIN/Password :').pressSequentially(env.LIB_PASSWORD, { delay: 150 });
+      await loginPage.getByRole('button', { name: /log in/i }).click();
+      await loginPage.waitForURL(/nytimes/i);
+    
+      console.log('Logging in to NYT');
+      await loginPage.getByTestId('login-lnk').click();
+      await loginPage.waitForURL(/myaccount\.nytimes/i);
+      await loginPage.getByLabel('Email Address').pressSequentially(env.NY_USERNAME, { delay: 150 });
+      await loginPage.getByTestId('submit-email').click();
+      await loginPage.getByLabel('Password', { exact: true }).pressSequentially(env.NY_PASSWORD, { delay: 150 });
+      await loginPage.getByTestId('login-button').click();
+      await loginPage.waitForLoadState('networkidle');
+    
+      const confirmationText = loginPage.getByText(/set a calendar reminder to renew/i);
+      const confirmationTextVisible = await confirmationText.isVisible();
+    
+      if (confirmationTextVisible) {
+        console.log('Successfully renewed NYT subscription');
+      } else {
+        console.log('Failed to renew NYT subscription');
+      }
 
-  console.log('Logging in to library');
-  await loginPage.getByLabel('Username or Barcode:').pressSequentially(env.LIB_USERNAME, { delay: 150 });
-  await loginPage.getByLabel('PIN/Password :').pressSequentially(env.LIB_PASSWORD, { delay: 150 });
-  await loginPage.getByRole('button', { name: /log in/i }).click();
-  await loginPage.waitForURL(/nytimes/i);
+      break;
+    }
+    catch (e) {
+      console.error('Error: ', e);
+      retries++;
 
-  console.log('Logging in to NYT');
-  await loginPage.getByTestId('login-lnk').click();
-  await loginPage.waitForURL(/myaccount\.nytimes/i);
-  await loginPage.getByLabel('Email Address').pressSequentially(env.NY_USERNAME, { delay: 150 });
-  await loginPage.getByTestId('submit-email').click();
-  await loginPage.getByLabel('Password', { exact: true }).pressSequentially(env.NY_PASSWORD, { delay: 150 });
-  await loginPage.getByTestId('login-button').click();
-  await loginPage.waitForLoadState('networkidle');
-
-  const confirmationText = loginPage.getByText(/set a calendar reminder to renew/i);
-  const confirmationTextVisible = await confirmationText.isVisible();
-
-  if (confirmationTextVisible) {
-    console.log('Successfully renewed NYT subscription');
-  } else {
-    console.log('Failed to renew NYT subscription');
+      if (retries < maxRetries) {
+        console.log(`Retrying... Attempt ${retries}`);
+      }
+    }
   }
 }
