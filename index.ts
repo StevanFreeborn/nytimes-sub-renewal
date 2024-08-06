@@ -20,7 +20,7 @@ async function main() {
   const initialPage = await context.newPage();
 
   console.log('Navigating to library website');
-  await initialPage.goto('https://www.olathelibrary.org/online-resources/online-entertainment#enewspapers');
+  await initialPage.goto('https://www.olathelibrary.org/online-resources/online-entertainment#enewspapers', { timeout: 60_000 });
 
   console.log('Clicking on New York Times');
   const libLoginPagePromise = context.waitForEvent('page');
