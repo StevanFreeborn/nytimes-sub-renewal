@@ -15,7 +15,7 @@ main()
 async function main() {
   chromium.use(stealth()); // use stealth plugin
 
-  const browser = await chromium.launch({ headless: env.CI, slowMo: 3000, channel: 'msedge' });
+  const browser = await chromium.launch({ headless: env.CI, slowMo: 3000 });
   const context = await browser.newContext();
   const initialPage = await context.newPage();
 
