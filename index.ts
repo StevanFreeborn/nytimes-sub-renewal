@@ -19,10 +19,12 @@ async function main() {
   const context = await browser.newContext();
   const initialPage = await context.newPage();
 
-  const maxRetries = 3;
-  let retries = 0;
+  const maxAttempts = 3;
+  let attempts = 0;
 
-  while (retries < maxRetries) {
+  while (attempts < maxAttempts) {
+    console.log(`Attempt ${attempts + 1} of ${maxAttempts}`);
+
     try {
       console.log('Navigating to library website');
       await initialPage.goto('https://www.olathelibrary.org/online-resources/online-entertainment#enewspapers', { timeout: 300_000 });
@@ -60,11 +62,7 @@ async function main() {
     }
     catch (e) {
       console.error('Error: ', e);
-      retries++;
-
-      if (retries < maxRetries) {
-        console.log(`Retrying... Attempt ${retries}`);
-      }
+      attempts++;
     }
   }
 }
