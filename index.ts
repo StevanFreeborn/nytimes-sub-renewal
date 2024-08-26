@@ -61,6 +61,10 @@ async function main() {
       break;
     }
     catch (e) {
+      if (attempts === 2) {
+        throw e;
+      }
+      
       console.error('Error: ', e);
       attempts++;
     }
