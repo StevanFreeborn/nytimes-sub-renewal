@@ -7,6 +7,7 @@ const envSchema = zod.object({
   NY_USERNAME: zod.string().min(1),
   NY_PASSWORD: zod.string().min(1),
   CI: zod.string().transform(v => v.toLowerCase() === 'true'),
+  OPEN_API_KEY: zod.string().min(1),
 });
 
 export const env = envSchema.parse(process.env);

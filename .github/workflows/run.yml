@@ -9,6 +9,7 @@ env:
   NY_USERNAME: ${{ secrets.NY_USERNAME }}
   NY_PASSWORD: ${{ secrets.NY_PASSWORD }}
   CI: true
+  OPEN_API_KEY: ${{ secrets.OPEN_API_KEY }}
 jobs:
   renew_subscription:
     name: Renew Subscription
