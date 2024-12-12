@@ -111,9 +111,8 @@ async function main() {
 
         const filePath = `${audioDirectory}/${audioFileName}`;
         await writeFile(filePath, audioData);
-        const stream = createReadStream(filePath);
 
-        const result = await getNumbers(stream);
+        const result = await getNumbers(filePath);
         
         console.log('Solving captcha:');
         console.log('Transcription:', result.transcription.text);
@@ -159,14 +158,14 @@ async function main() {
 }
 
 
-async function getNumbers(stream: ReadStream, attempts = 0) {
-  if (attempts == 2) {
+async function getNumbers(filePath: string, attempts = 0) {
+  if (attempts == 10) {
     throw new Error('Error transcribing audio: Max retries exceeded');
   }
 
   try {
     const transcription = await openai.audio.transcriptions.create({
-      file: stream,
+      file: createReadStream(filePath),
       model: 'whisper-1'
     });
     
@@ -179,12 +178,12 @@ async function getNumbers(stream: ReadStream, attempts = 0) {
 
     if (numbers.length === 0) {
       console.log('No numbers found in transcription. Retrying...');
-      return getNumbers(stream, attempts + 1);
+      return getNumbers(filePath, attempts + 1);
     }
 
     return { numbers, transcription };
   } catch (e) {
     console.error('Error transcribing audio:', e);
-    return getNumbers(stream, attempts + 1);
+    return getNumbers(filePath, attempts + 1);
   }
 }
