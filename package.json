@@ -7,10 +7,9 @@
   },
   "devDependencies": {
     "dotenv": "^16.4.5",
-    "playwright": "^1.45.3",
-    "playwright-extra": "^4.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "ts-node": "^10.9.2",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "openai": "^4.76.1",
+    "rebrowser-playwright": "^1.49.1"
   }
 }
