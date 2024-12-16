@@ -91,7 +91,6 @@ async function main() {
         const playButton = captchaFrame.locator('.audio-captcha-play-button');
         const audio = captchaFrame.locator('.audio-captcha-track');
         
-
         await audioButton.click();
         await playButton.click();
         const audioSrc = await audio.getAttribute('src');
@@ -112,7 +111,7 @@ async function main() {
         const filePath = `${audioDirectory}/${audioFileName}`;
         await writeFile(filePath, audioData);
 
-        const result = await getNumbers(filePath);
+        const result = await getNumbersForCaptcha(filePath);
         
         console.log('Solving captcha:');
         console.log('Transcription:', result.transcription.text);
@@ -133,6 +132,7 @@ async function main() {
       await loginPage.getByTestId('submit-email').click();
       await loginPage.getByLabel('Password', { exact: true }).pressSequentially(env.NY_PASSWORD, { delay: 150 });
       await loginPage.getByTestId('login-button').click();
+      await loginPage.waitForLoadState('networkidle');
       await loginPage.screenshot({ path: 'screenshots/5.png' });
 
       const confirmationText = loginPage.getByText(/set a calendar reminder to renew/i);
@@ -157,9 +157,8 @@ async function main() {
   }
 }
 
-
-async function getNumbers(filePath: string, attempts = 0) {
-  if (attempts == 10) {
+async function getNumbersForCaptcha(filePath: string, attempts = 0) {
+  if (attempts == 2) {
     throw new Error('Error transcribing audio: Max retries exceeded');
   }
 
@@ -168,22 +167,24 @@ async function getNumbers(filePath: string, attempts = 0) {
       file: createReadStream(filePath),
       model: 'whisper-1'
     });
+
+    console.log('Transcription:', transcription.text);
     
     const numbers = transcription.text
       .replace(/\./g,' ')
       .toLowerCase()
       .split(' ')
-      .map(word => TEXT_TO_NUMBERS_MAP[word])
+      .map(word => TEXT_TO_NUMBERS_MAP[word] ?? Object.values(TEXT_TO_NUMBERS_MAP).find(num => word.includes(num.toString())))
       .filter(num => num !== undefined);
 
     if (numbers.length === 0) {
       console.log('No numbers found in transcription. Retrying...');
-      return getNumbers(filePath, attempts + 1);
+      return getNumbersForCaptcha(filePath, attempts + 1);
     }
 
     return { numbers, transcription };
   } catch (e) {
     console.error('Error transcribing audio:', e);
-    return getNumbers(filePath, attempts + 1);
+    return getNumbersForCaptcha(filePath, attempts + 1);
   }
 }
