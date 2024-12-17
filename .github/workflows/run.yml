@@ -25,6 +25,8 @@ jobs:
           node-version: lts/*
       - name: Install dependencies
         run: npm install
+      - name: Install playwright dependencies
+        run: npx playwright install chrome
       - name: Run script
         run: npm run start
       - name: Upload screenshots
